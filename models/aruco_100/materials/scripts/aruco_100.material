@@ -1,0 +1,15 @@
+material aruco/marker_100
+{
+    technique
+    {
+        pass
+        {
+            texture_unit
+            {
+                texture qr.png
+                filtering none
+                scale 1 1
+            }
+        }
+    }
+}
