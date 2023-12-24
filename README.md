@@ -1,5 +1,6 @@
 # Автономный полет БПЛА мультироторного типа для поиска возможных очагов возгорания
-img1 pass
+
+![image](https://github.com/Sandrolek/info-project-clover/blob/master/drone_sim.jpg)
 
 ## Команда проекта:
 ```
