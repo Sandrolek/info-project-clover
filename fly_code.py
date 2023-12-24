@@ -67,7 +67,7 @@ def image_hsv_callback(data):
     hsv_topic.publish(bridge.cv2_to_imgmsg(mask, 'mono8'))
     orig_topic.publish(bridge.cv2_to_imgmsg(img, 'bgr8'))
 
-hsv_sub = rospy.Subscriber('main_camera/image_raw_throttled', Image, queue_size=1)
+hsv_sub = rospy.Subscriber('main_camera/image_raw_throttled', Image, image_hsv_callback)
 
 def find_fire(data):
 
