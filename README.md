@@ -49,14 +49,10 @@ import cv2
 from cv_bridge import CvBridge
 ```
 
-Объявляем ноду:
-
-```
-rospy.init_node('flight') 
-```
-
 Инициализируем ROS ноду и добавляем необходимые для полета прокси
-```rospy.init_node('flight') 
+```
+rospy.init_node('flight')
+
 get_telemetry = rospy.ServiceProxy('get_telemetry', srv.GetTelemetry) 
 navigate = rospy.ServiceProxy('navigate', srv.Navigate)
 land = rospy.ServiceProxy('land', Trigger) 
