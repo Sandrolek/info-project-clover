@@ -1,3 +1,4 @@
+import json
 import requests
 from datetime import datetime
 from pprint import pprint
@@ -30,9 +31,6 @@ land = rospy.ServiceProxy('land', Trigger)
 arming = rospy.ServiceProxy('mavros/cmd/arming', CommandBool)
 
 bridge = CvBridge() 
-color = rospy.Publisher('test', Image, queue_size=1)
-hsv_topic = rospy.Publisher('hsv', Image, queue_size=1)
-orig_topic = rospy.Publisher('orig', Image, queue_size=1)
 
 def navigate_wait(x=0, y=0, z=0, yaw=float("nan"), speed=0.5, frame_id='aruco_map', auto_arm=False, tolerance=0.2):
     navigate(x=x, y=y, z=z, yaw=yaw, speed=speed, frame_id=frame_id, auto_arm=auto_arm)
@@ -119,6 +117,14 @@ def get_points(qr):
 
     return points
 
+def unregister():
+    hsv_sub.unregister()
+    hsv_topic.unregister()
+    orig_topic.unregister()
+
+def get_route(points):
+    return sorted(points)
+
 def report(data):
 
     result = {}
@@ -134,19 +140,44 @@ def report(data):
 
     result["datetime"] = curr_time
 
+    result = {'datetime': '28.05.2079 02:44',
+            'logs': [   {'coordinates': [0.0, 3.5], 'state': 'FIRE'},
+                        {'coordinates': [2.0, 2.5], 'state': 'FIRE'},
+                        {'coordinates': [2.0, 4.5], 'state': 'FIRE'},
+                        {'coordinates': [3.0, 1.5], 'state': 'FIRE'},
+                        {'coordinates': [4.0, 0.5], 'state': 'FIRE'}]}
+
     print("FINAL REPORT:")
     pprint(result)
 
-    response = requests.post(url="https://drone-stats.onrender.com/api/logs", json=result)
+    json_data = json.dumps(result)
+    url = "https://drone-stats.onrender.com/api/logs"
+
+    # Set the headers to indicate that you're sending JSON
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+
+    print(json_data)
+
+    # Make the POST request
+    response = requests.post(url, data=json_data, headers=headers)
+
+    # response = requests.post(url="https://drone-stats.onrender.com/api/logs", json=result)
 
     print(response)
 
 FLIGHT_HEIGHT = 1
 FLIGHT_SPEED = 0.7
 
-def flight():
+hsv_sub = rospy.Subscriber('main_camera/image_raw_throttled', Image, image_hsv_callback)
 
-    hsv_sub = rospy.Subscriber('main_camera/image_raw_throttled', Image, image_hsv_callback)
+color = rospy.Publisher('test', Image, queue_size=1)
+hsv_topic = rospy.Publisher('hsv', Image, queue_size=1)
+orig_topic = rospy.Publisher('orig', Image, queue_size=1)
+
+def flight():
 
     (start_x, start_y) = take_off()
 
@@ -156,10 +187,12 @@ def flight():
     points = get_points(qr)
     print(f"Points from QR code: {points}")
 
+    route_points = get_route(points)
+
     result_report = []
 
-    for i in range(0, len(points)):
-        point_x, point_y = points[i][0], points[i][1]
+    for i in range(0, len(route_points)):
+        point_x, point_y = route_points[i][0], route_points[i][1]
         
         navigate_wait(x = point_x, y = point_y, z=FLIGHT_HEIGHT, speed=FLIGHT_SPEED)
         rospy.sleep(2)
@@ -183,6 +216,8 @@ def flight():
     land()
 
     report(result_report)
+
+    unregister()
 
 def main():
     flight()
