@@ -55,7 +55,7 @@ from cv_bridge import CvBridge
 rospy.init_node('flight') 
 ```
 
-### Инициализируем ROS ноду и добавляем необходимые для полета прокси
+Инициализируем ROS ноду и добавляем необходимые для полета прокси
 ```rospy.init_node('flight') 
 get_telemetry = rospy.ServiceProxy('get_telemetry', srv.GetTelemetry) 
 navigate = rospy.ServiceProxy('navigate', srv.Navigate)
@@ -64,13 +64,13 @@ land = rospy.ServiceProxy('land', Trigger)
 bridge = CvBridge() 
 ```
 
-### Создаем публикаторов в топики для отладки
+Создаем публикаторов в топики для отладки
 ```
 color = rospy.Publisher('test', Image, queue_size=1)
 hsv_topic = rospy.Publisher('hsv', Image, queue_size=1)
 orig_topic = rospy.Publisher('orig', Image, queue_size=1)
 ```
-### Необходимые константы
+Необходимые константы
 ```
 FLIGHT_HEIGHT = 1
 FLIGHT_SPEED = 0.7
@@ -79,7 +79,7 @@ MIN_CNT_AREA = 200
 HSV_RED_FILTER = ((0, 120, 196), (20, 167, 255))
 ```
 
-### URL для публикации данных в БД
+URL для публикации данных в БД
 ```URL = "https://drone-stats.onrender.com/api/logs"```
 
 ### Алгоритм работы:
