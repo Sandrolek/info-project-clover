@@ -3,10 +3,12 @@ var md5 = require("md5");
 
 const DBSOURCE = "db.sqlite";
 
+
+// Создаём таблицы, если их ещё нет в базе данных
 let db = new sqlite3.Database(DBSOURCE, (err) => {
     
     if (err) {
-        // Cannot open database
+        // Если случилаь ошибка, выводим её в консоль сервера
         console.error(err.message);
         throw err;
     }
@@ -27,7 +29,7 @@ let db = new sqlite3.Database(DBSOURCE, (err) => {
             FOREIGN KEY (report_id) REFERENCES reports (id)
         )
     `
-
+    
     db.run(sqlReports)
     db.run(sqlLogs)
 

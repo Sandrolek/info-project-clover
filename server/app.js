@@ -9,6 +9,7 @@ var apiRouter = require("./routes/api");
 
 var app = express();
 
+// Настройка CORS
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header(
@@ -17,7 +18,6 @@ app.use((req, res, next) => {
     );
     next();
 });
-
 
 app.options('*', cors()) // include before other routes
 app.use(cors());
@@ -28,6 +28,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+// Указываем наши route'ы
 app.use("/", indexRouter);
 app.use("/api", apiRouter);
 

@@ -2,13 +2,14 @@ var express = require("express");
 var router = express.Router();
 var db = require("../database");
 
+
+// Записывает логи, полученные от дрона
 router.post("/logs", function (req, res, next) {
     const data = req.body;
 
     const datetime = data["datetime"];
     const logs = data["logs"];
 
-    // Insert report
     const ReportQuery = "INSERT INTO reports (datetime) VALUES (?)";
     const ReportParams = [datetime];
 
@@ -25,8 +26,8 @@ router.post("/logs", function (req, res, next) {
         insertLogs(reportId);
     });
 
+    // После записи нового репорта, записываются все связанные с ним логи
     function insertLogs(reportId) {
-        // Insert logs
         for (log of logs) {
             const LogQuery =
                 "INSERT INTO logs (coordinates, state, report_id) VALUES (?, ?, ?)";
@@ -37,6 +38,7 @@ router.post("/logs", function (req, res, next) {
             ];
 
             db.run(LogQuery, LogParams, function (err, result) {
+                // Если произошла ошибка, выводим её
                 if (err) {
                     res.status(400).json({ error: err.message });
                     return;
@@ -44,6 +46,7 @@ router.post("/logs", function (req, res, next) {
             });
         }
 
+        // После успешной записи отправляем статус 200
         res.json({
             status: 200,
             id: reportId,
@@ -51,38 +54,7 @@ router.post("/logs", function (req, res, next) {
     }
 });
 
-router.get("/logs/all", function (req, res, next) {
-    const sql = "SELECT * FROM logs";
-
-    db.all(sql, [], function (err, rows) {
-        if (err) {
-            res.status(400).json({ error: err.message });
-            return;
-        }
-
-        res.json({
-            status: 200,
-            data: rows,
-        });
-    });
-});
-
-router.get("/reports/all", function (req, res, next) {
-    const sql = "SELECT * FROM reports";
-
-    db.all(sql, [], function (err, rows) {
-        if (err) {
-            res.status(400).json({ error: err.message });
-            return;
-        }
-
-        res.json({
-            status: 200,
-            data: rows,
-        });
-    });
-});
-
+// Endpoint для получение последниг логов
 router.get("/logs", function (req, res, next) {
     const sql = `
         SELECT logs.*, reports.datetime
@@ -91,7 +63,9 @@ router.get("/logs", function (req, res, next) {
         WHERE logs.report_id = (SELECT id FROM reports ORDER BY datetime DESC LIMIT 1);    
     `;
 
+    // Получаем логи
     db.all(sql, [], function (err, rows) {
+        // Если случилась ошибка, выводим её
         if (err) {
             res.status(400).json({ error: err.message });
             return;
@@ -99,11 +73,13 @@ router.get("/logs", function (req, res, next) {
 
         let datetime = null
 
+        // Форматируем вывод
         rows.forEach((row) => {
             datetime = row.datetime
             delete row.datetime
         });
 
+        // Отправляем логи на клиент
         res.json({
             status: 200,
             datetime,
